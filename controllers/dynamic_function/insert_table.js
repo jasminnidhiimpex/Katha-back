@@ -1,3 +1,4 @@
+const logger = require("../../logger");
 const db = require("../../model/connection");
 
 const insertTable = (tableName, data, callback) => {
@@ -15,7 +16,7 @@ const insertTable = (tableName, data, callback) => {
   const insertQuery = `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES ${placeholders}`;
   db.query(insertQuery, values, (err, result) => {
     if (err) {
-        console.error("Insert error:", err);
+        logger.error("Insert error:", err);
         return callback(err);
     }
     callback(null, result);

@@ -1,3 +1,4 @@
+const logger = require('../logger');
 const db = require('../model/connection');
 const insertTable = require('./dynamic_function/insert_table');
 const moment = require('moment');
@@ -22,6 +23,7 @@ exports.addYajmaYadi = async (req, res, next) => {
       refMobile,
       slipNo
     } = req.body;
+    
     const currentDateTime = moment().format('YYYY-MM-DD HH:mm:ss');
 
     // 1. Insert form data into yajman_form
@@ -45,11 +47,13 @@ exports.addYajmaYadi = async (req, res, next) => {
     
     db.beginTransaction((err) => {
       if (err) {
+        logger.error("Error starting transaction",err);
         return res.status(400).json({ message: "Error starting transaction", error: err.message });
       }
 
       insertTable('yajman_form', formData, async (err) => {
         if (err) {
+          logger.error("Error inserting in yajman_form", err);
           return db.rollback(() => { res.status(400).json({
               message: "Error inserting in yajman_form",
               error: err.message,
@@ -60,9 +64,11 @@ exports.addYajmaYadi = async (req, res, next) => {
         const selectQuery = `SELECT id FROM yajman_form WHERE main_member = ?`;
         db.query(selectQuery,[mainMember.fullName], async (err, yajmanId) => {
           if(err){
+            logger.error("Error fetching yajman_id from yajman_form",err);
             return db.rollback(() => { res.status(400).json({message: "Error fetching yajman_id from yajman_form", error:err.message}); });
           }
           if(yajmanId.length === 0){
+            logger.error("Yajman id not found.")
             return db.rollback(() => { res.status(400).json({message: "Yajman id not found."}); });
           }
 
@@ -94,6 +100,7 @@ exports.addYajmaYadi = async (req, res, next) => {
 
           insertTable('yajman_members', allMembers, async (err) => {
             if (err) {
+              logger.error("Error inserting in yajman_members",err);
               return db.rollback(() => { res.status(400).json({
                   message: "Error inserting in yajman_members",
                   error: err.message,
@@ -103,11 +110,14 @@ exports.addYajmaYadi = async (req, res, next) => {
 
             db.commit((err) => {
               if (err) {
+                logger.error("Transaction commit error");
                 return db.rollback(() => {
                   logger.error("Transaction commit error:", err);
                   res.status(500).json({ message: "Transaction commit error", error: err.message });
                 });
               }
+
+              logger.info("Inserted successfully.");
               res.status(200).json({ message: "Inserted successfully." });
             });
           });
@@ -115,6 +125,7 @@ exports.addYajmaYadi = async (req, res, next) => {
       });
     });
   } catch (error) {
+    logger.error("Error in addYajmaYadi",error);
     res.status(400).json({
       message: "Error in addYajmaYadi",
       error: error.message,
