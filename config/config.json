@@ -18,6 +18,11 @@
     "password": null,
     "database": "shreemat_bhagwat_katha",
     "host": "127.0.0.1",
-    "dialect": "mysql"
+    "dialect": "mysql",
+    dialectOptions: {
+      ssl: {
+        rejectUnauthorized: true
+      }
+    }
   }
 }
