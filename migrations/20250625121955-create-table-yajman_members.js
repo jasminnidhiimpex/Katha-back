@@ -14,7 +14,7 @@ module.exports = {
         allowNull: true,
       },
       full_name: {
-        type: Sequelize.TEXT,
+        type: Sequelize.STRING(255),
         allowNull: true,
       },
       age: {
