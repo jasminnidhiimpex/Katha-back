@@ -50,16 +50,17 @@ exports.updateYajmaYadi = async (req, res, next) => {
                    payment_ref,address,ref_city,ref_mobile,slip_no
                 } = data;
 
-                const update = {
-                    aadhaar, age, mobile, full_name : name, gender, update_at: currentDateTime
-                }
-
-                const conditions = {
-                    yajman_id:id,
-                    is_main_member : 1
-                }
-
-                if(update) {
+                const hasMemberFields = aadhaar || age || mobile || name || gender;
+                if(hasMemberFields) {
+                    const update = {
+                        aadhaar, age, mobile, full_name : name, gender, update_at: currentDateTime
+                    }
+    
+                    const conditions = {
+                        yajman_id:id,
+                        is_main_member : 1
+                    }
+                
                     updateTable('yajman_members', update, conditions, (err) => {
                         if(err){
                             logger.error("Error in yajman_members",err);
@@ -82,11 +83,10 @@ exports.updateYajmaYadi = async (req, res, next) => {
                 } else {
                     const update = {
                         ref_name,city, village, department,member_count,total_amount,payment_status,payment_date,
-                        payment_ref,address,ref_city,ref_mobile,slip_no
+                        payment_ref,address,ref_city,ref_mobile,slip_no,updated_at: currentDateTime
                     }
-                    const conditions = {
-                        id
-                    }
+                    const conditions = {id}
+
                     updateTable('yajman_form', update, conditions, (err) => {
                         if(err){
                             logger.error("Error in yajman_form",err);
