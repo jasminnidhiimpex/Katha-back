@@ -1,13 +1,21 @@
-const logger = require("../logger");
-const db = require("../model/connection");
+const logger = require("../../logger");
+const db = require("../../model/connection");
 
 
 exports.getYajmanYadi = (req, res) => {
   try {
-    const query = `SELECT ym.*, yf.* 
-      FROM yajman_members ym
-      LEFT JOIN yajman_form yf ON ym.yajman_id = yf.id
-      ORDER BY ym.yajman_id, ym.is_main_member DESC, ym.id`;
+    const query = `SELECT ym.id AS member_id,
+      ym.yajman_id,
+      ym.full_name,
+      ym.age,
+      ym.gender,
+      ym.aadhaar,
+      ym.mobile,
+      ym.is_main_member, yf.* 
+    FROM yajman_members ym
+    LEFT JOIN yajman_form yf ON ym.yajman_id = yf.id
+    WHERE ym.is_deleted = 0 AND yf.is_deleted = 0
+    ORDER BY ym.yajman_id, ym.is_main_member DESC`;
     db.query(query, (err, results) => {
       if (err) {
         logger.error("Error getting yajman_members", err);
@@ -22,7 +30,8 @@ exports.getYajmanYadi = (req, res) => {
 
       results.forEach(member => {
         const {
-          id, // from yajman_members
+          // id, // from yajman_members
+          member_id,
           yajman_id,
           full_name,
           age,
@@ -63,6 +72,7 @@ exports.getYajmanYadi = (req, res) => {
 
           yajmanMap[yajman_id] = {
             id: yajman_id,
+            member_id: member_id,
             name: full_name,
             age,
             gender,
@@ -97,7 +107,8 @@ exports.getYajmanYadi = (req, res) => {
             };
           }
           yajmanMap[yajman_id].children.push({
-            id,
+            id:member_id,
+            yajman_id:yajman_id,
             name: full_name,
             age,
             gender,

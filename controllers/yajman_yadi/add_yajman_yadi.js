@@ -1,6 +1,6 @@
-const logger = require('../logger');
-const db = require('../model/connection');
-const insertTable = require('./dynamic_function/insert_table');
+const logger = require('../../logger');
+const db = require('../../model/connection');
+const insertTable = require('../dynamic_function/insert_table');
 const moment = require('moment');
 
 
@@ -83,6 +83,7 @@ exports.addYajmaYadi = async (req, res, next) => {
             mobile: mainMember.mobile,
             gender: mainMember.gender,
             is_main_member: 1,
+            created_at: currentDateTime,
           };
 
           // 3. Create other members records
@@ -94,6 +95,7 @@ exports.addYajmaYadi = async (req, res, next) => {
             mobile: member.mobile,
             gender: member.gender,
             is_main_member: 0,
+            created_at: currentDateTime,
           }));
 
           const allMembers = [mainMemberData, ...otherMemberData];
