@@ -61,7 +61,7 @@ exports.addYajmaYadi = async (req, res, next) => {
           });
         }
 
-        const selectQuery = `SELECT id FROM yajman_form WHERE main_member = ?`;
+        const selectQuery = `SELECT id FROM yajman_form WHERE main_member = ? AND is_deleted = 0`;
         db.query(selectQuery,[mainMember.fullName], async (err, yajmanId) => {
           if(err){
             logger.error("Error fetching yajman_id from yajman_form",err);
