@@ -9,7 +9,7 @@ exports.updateYajmaYadi = async (req, res, next) => {
   try {
     const {
       id,
-      member_id,
+      // member_id,
       refName,
       city,
       address,
@@ -53,7 +53,7 @@ exports.updateYajmaYadi = async (req, res, next) => {
         return res.status(400).json({ message: "Error starting transaction", error: err.message });
       }    
 
-      updateTable('yajman_form', formData, { id:mainMember.id }, async (err) => {
+      updateTable('yajman_form', formData, { id }, async (err) => {
         if (err) {
           logger.error("Error updating yajman_form", err);
           return db.rollback(() => {
@@ -70,8 +70,8 @@ exports.updateYajmaYadi = async (req, res, next) => {
           gender: mainMember.gender,
           updated_at: currentDateTime,
         };
-
-        updateTable('yajman_members', mainMemberData, { id: member_id }, async (err) => {
+        
+        updateTable('yajman_members', mainMemberData, { id: mainMember.member_id }, async (err) => {
           if (err) {
             logger.error("Error updating main member", err);
             return db.rollback(() => {

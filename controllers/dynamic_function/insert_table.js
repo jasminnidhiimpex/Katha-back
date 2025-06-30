@@ -1,6 +1,7 @@
 const logger = require("../../logger");
 const db = require("../../model/connection");
 
+
 const insertTable = (tableName, data, callback) => {
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return callback(new Error("No data provided"));

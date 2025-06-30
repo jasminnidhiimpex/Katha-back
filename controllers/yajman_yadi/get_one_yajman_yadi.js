@@ -2,20 +2,30 @@ const logger = require("../../logger");
 const db = require("../../model/connection");
 
 
-exports.getYajmanYadi = (req, res) => {
+exports.getOneYajmanYadi = (req, res) => {
   try {
-    const query = `SELECT ym.id AS member_id,
-      ym.yajman_id,
-      ym.full_name,
-      ym.age,
-      ym.gender,
-      ym.aadhaar,
-      ym.mobile,
-      ym.is_main_member, yf.* 
-    FROM yajman_members ym
-    LEFT JOIN yajman_form yf ON ym.yajman_id = yf.id
-    WHERE ym.is_deleted = 0 AND yf.is_deleted = 0
-    ORDER BY ym.yajman_id, ym.is_main_member DESC`;
+    const { id } = req.params;
+
+    let query = `
+      SELECT ym.id AS member_id,
+        ym.yajman_id,
+        ym.full_name,
+        ym.age,
+        ym.gender,
+        ym.aadhaar,
+        ym.mobile,
+        ym.is_main_member, yf.* 
+      FROM yajman_members ym
+      LEFT JOIN yajman_form yf ON ym.yajman_id = yf.id
+      WHERE ym.is_deleted = 0 AND yf.is_deleted = 0
+    `;
+
+    if (id) {
+      query += ` AND ym.yajman_id = ${db.escape(id)} `;
+    }
+
+    query += ` ORDER BY ym.yajman_id, ym.is_main_member DESC`;
+
     db.query(query, (err, results) => {
       if (err) {
         logger.error("Error getting yajman_members", err);
@@ -26,11 +36,9 @@ exports.getYajmanYadi = (req, res) => {
       let total_members = 0;
       let total_received_amount = 0;
       let total_pending_amount = 0;
-      let total_yajman_group = 0;
 
       results.forEach(member => {
         const {
-          // id, // from yajman_members
           member_id,
           yajman_id,
           full_name,
@@ -39,8 +47,6 @@ exports.getYajmanYadi = (req, res) => {
           aadhaar,
           mobile,
           is_main_member,
-
-          // From yajman_form (all prefixed with yf.)
           ref_name,
           city,
           village,
@@ -64,22 +70,17 @@ exports.getYajmanYadi = (req, res) => {
           const numericAmount = parseFloat(total_amount || 0);
           const status = (payment_status || "").toLowerCase();
 
-          if (status === "pending") {
-            total_pending_amount += numericAmount;
-          } else if (status === "paid") {
-            total_received_amount += numericAmount;
-          }
+          if (status === "pending") total_pending_amount += numericAmount;
+          else if (status === "received") total_received_amount += numericAmount;
 
           yajmanMap[yajman_id] = {
             id: yajman_id,
-            member_id: member_id,
+            member_id,
             name: full_name,
             age,
             gender,
             aadhaar,
             mobile,
-
-            // yajman_form info
             ref_name,
             city,
             village,
@@ -94,8 +95,7 @@ exports.getYajmanYadi = (req, res) => {
             ref_city,
             ref_mobile,
             slip_no,
-            main_member,            
-
+            main_member,
             children: []
           };
         } else {
@@ -106,9 +106,10 @@ exports.getYajmanYadi = (req, res) => {
               children: []
             };
           }
+
           yajmanMap[yajman_id].children.push({
-            id:member_id,
-            yajman_id:yajman_id,
+            id: member_id,
+            yajman_id,
             name: full_name,
             age,
             gender,
@@ -117,18 +118,18 @@ exports.getYajmanYadi = (req, res) => {
           });
         }
       });
-      
+
       const treeData = Object.values(yajmanMap);
-      total_yajman_group += treeData.length;
+      const total_yajman_group = treeData.length;
 
       res.json({
         total: {
-          total_members:total_members,
-          total_pending_amount:total_pending_amount,
-          total_received_amount:total_received_amount,
-          total_yajman_group:total_yajman_group,
+          total_members,
+          total_pending_amount,
+          total_received_amount,
+          total_yajman_group
         },
-        data:treeData,
+        data: treeData
       });
     });
   } catch (error) {

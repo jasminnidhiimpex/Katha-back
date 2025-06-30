@@ -6,23 +6,23 @@ const moment = require('moment');
 
 exports.addYajmaYadi = async (req, res, next) => {
   try {
-    const {
-      refName,
-      city,
-      address,
-      village,
-      department,
-      memberCount,
-      mainMember,
-      otherMembers,
-      totalAmount,
-      paymentStatus,
-      paymentDate,
-      paymentRef,
-      refCity,
-      refMobile,
-      slipNo
-    } = req.body;
+      const {
+          refName,
+          city,
+          address,
+          village,
+          department,
+          memberCount,
+          mainMember,
+          otherMembers,
+          totalAmount,
+          paymentStatus,
+          paymentDate,
+          paymentRef,
+          refCity,
+          refMobile,
+          slipNo
+      } = req.body;
     
     const currentDateTime = moment().format('YYYY-MM-DD HH:mm:ss');
 
